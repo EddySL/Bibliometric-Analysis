@@ -1,0 +1,35 @@
+import pandas as pd
+from datetime import datetime
+
+# Cargando el archivo Excel generado con R-Bibliometrix (Biblioshiny App)
+file_path = 'D:/Dataset.xlsx'
+df = pd.read_excel(file_path, usecols=['PY', 'TC'])
+
+# Año actual para cálculos relacionados con el tiempo
+current_year = datetime.now().year
+
+# Ordenando los datos por cantidad de citas de forma descendente
+df_sorted = df.sort_values(by='TC', ascending=False)
+
+# Índice i10
+i10_index = len(df_sorted[df_sorted['TC'] >= 10])
+
+# Índice h (ya calculado previamente, lo reutilizamos para el índice m y e)
+h_index = 0
+for i, row in enumerate(df_sorted['TC'], start=1):
+    if i <= row:
+        h_index = i
+    else:
+        break
+
+# Índice m
+years_since_first_publication = current_year - df_sorted['PY'].min()
+m_index = h_index / years_since_first_publication if years_since_first_publication > 0 else 0
+
+# Índice e
+h_core_citations = df_sorted['TC'][:h_index].sum()  # Total de citas de los artículos en el núcleo h
+e_index = (h_core_citations - h_index**2)**0.5 if h_core_citations > h_index**2 else 0
+
+print(f"Índice i10: {i10_index}")
+print(f"Índice m: {m_index:.2f}")
+print(f"Índice e: {e_index:.2f}")
