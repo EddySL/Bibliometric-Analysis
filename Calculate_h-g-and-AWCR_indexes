@@ -1,0 +1,33 @@
+""" 
+Codigo que permite calcular el h-index, el g-index y el AWCR index
+
+"""
+
+import pandas as pd
+
+# Cargamos el dataset generado con R-Bibliometrix (Biblioshiny App)
+file_path = 'D:/Dataset.xlsx'     # Definimos la ubicación del archivo
+df = pd.read_excel(file_path, usecols=['No.', 'PY', 'TC'])
+
+# Ordenamos los datos por 'Cantidad de citas' de manera descendente
+df_sorted = df.sort_values(by='TC', ascending=False)
+
+# Calculamos el índice h
+h_index = sum(df_sorted['TC'] >= (df_sorted.index + 1))
+
+# Calculamos el índice g
+citas_cumsum = df_sorted['TC'].cumsum()
+g_index = max([i for i, total in enumerate(citas_cumsum, start=1) if total >= i**2])
+
+# Calculando el año actual
+current_year = datetime.now().year
+
+# Calculando el total de citas y el total de años transcurridos para cada publicación
+df_sorted['Años Transcurridos'] = current_year - df_sorted['PY']
+
+# Total de citas dividido por el total de años transcurridos
+awcr = df_sorted['TC'].sum() / df_sorted['Años Transcurridos'].sum()
+
+print(f"Índice h: {h_index}")
+print(f"Índice g: {g_index}")
+print(f"índice AWCR aproximado: {awcr}")
