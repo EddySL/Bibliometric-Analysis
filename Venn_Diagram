@@ -1,0 +1,52 @@
+import matplotlib.pyplot as plt
+import matplotlib_venn as venn
+import matplotlib.patches as patches
+
+# Datos de cantidad de artículos
+scopus_articles = 78  # Cantidad de artículos en Scopus
+wos_articles = 55     # Cantidad de artículos en WOS
+duplicated_articles = 35  # Cantidad de artículos duplicados
+
+# Calculando los valores únicos para Scopus y WOS y el total de artículos únicos
+scopus_unique = scopus_articles - duplicated_articles
+wos_unique = wos_articles - duplicated_articles
+nonduplicated = scopus_unique + wos_unique + duplicated_articles
+
+# Utilizando un factor de escala para el tamaño del círculo exterior
+scale_factor = 0.0005  
+circle_radius = nonduplicated * scale_factor
+
+# Creando el diagrama de Venn
+plt.figure(figsize=(12, 8))
+ax = plt.gca()
+venn_diagram = venn.venn2(subsets=(scopus_unique, wos_unique, duplicated_articles), set_labels=('Scopus', 'WOS'))
+
+# Ajustando tamaños de los textos
+for text in venn_diagram.set_labels:
+    text.set_fontsize(12)
+for text in venn_diagram.subset_labels:
+    text.set_fontsize(12)
+
+# # Añadiendo el círculo externo para representar los artículos no duplicados
+circle = patches.Circle((1.5, 0.5), circle_radius, color='blue', alpha=0.3, label=f'Nonduplicated Papers: {nonduplicated}')
+ax.add_patch(circle)
+
+# Añadiendo leyendas y ajustando el layout
+plt.legend(handles=[venn_diagram.get_patch_by_id('10'), venn_diagram.get_patch_by_id('01'), venn_diagram.get_patch_by_id('11'), circle],
+           labels=[f'Scopus ({scopus_unique/(nonduplicated-duplicated_articles)*100:.2f}%)', 
+                   f'WOS ({wos_unique/(nonduplicated-duplicated_articles)*100:.2f}%)', 
+                   f'Overlap ({duplicated_articles/nonduplicated*100:.2f}%)'],
+           title="Databases", loc='upper left', bbox_to_anchor=(1, 1))
+
+plt.title("Publications on XXX in Scopus and WOS", pad=20)
+
+# Ajustando el layout para no cortar la leyenda y guardando la figura con alta resolución
+plt.tight_layout(rect=[0, 0, 0.75, 1])
+file_path = 'D:/Venn_Diagram.png'  # Define aquí la ubicación del archivo que se exportará, incluyendo el nombre del archivo 
+plt.savefig(file_path, dpi=300)
+
+# Mostrar el gráfico
+plt.show()
+
+# Devolver la ruta del archivo guardado
+file_path
