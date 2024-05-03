@@ -1,0 +1,64 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Cargar los datos desde el archivo Excel
+df = pd.read_excel('D:/Bradford_Law.xlsx')  # Aqui debes especificar la ubicacion de un Data Frame generado con R-Bibliometrix (Biblioshiny App).
+
+# Ordenar el dataframe por el rango
+df_sorted = df.sort_values('Rank')
+
+# Crear una columna que indica si la revista es parte de la Zona 1
+df_sorted['Is_Core'] = df_sorted['Zone'] == 'Zone 1'
+
+# Filtramos las revistas de la Zona 1 para las etiquetas
+core_sources = df_sorted[df_sorted['Is_Core']]
+
+# Configurar el estilo de seaborn para la visualización
+sns.set(style="whitegrid")
+
+# Crear la figura y el eje para la visualización
+plt.figure(figsize=(14, 7))
+
+# Configurar el color de fondo
+plt.gca().set_facecolor('whitesmoke')
+
+# Rellenar el área bajo la curva y establecer el estilo de la línea
+plt.fill_between(df_sorted['Rank'], df_sorted['Freq'], color="lightsteelblue", alpha=0.7)
+plt.plot(df_sorted['Rank'], df_sorted['Freq'], color="midnightblue", alpha=0.8, linewidth=2.5)
+
+# Resaltar las revistas de la Zona 1
+plt.fill_between(core_sources['Rank'], core_sources['Freq'], color="Teal", alpha=0.6)
+
+# Escala logarítmica para el eje X
+plt.xscale('log')
+
+# Añadir una cuadrícula
+plt.grid(True, which="both", ls="--", linewidth=0.5)
+
+# Configurar las etiquetas y el título
+plt.title('Bradford\'s Law Visualization', fontsize=18, fontweight='bold', color='navy')
+plt.xlabel('Source Rank (log scale)', fontsize=14, fontweight='bold', color='navy')
+plt.ylabel('Articles', fontsize=14, fontweight='bold', color='navy')
+
+# Texto para la Zona 1
+plt.text(core_sources['Rank'].median(), core_sources['Freq'].median(), 'Core Sources', 
+         fontsize=35, fontweight='bold', color='MidnightBlue', horizontalalignment='right')
+
+
+# Añadir las etiquetas para las revistas de la Zona 1 con orientación vertical
+for index, row in core_sources.iterrows():
+    plt.text(row['Rank'], row['Freq'], row['Source'], color="darkslategray", fontsize=17, 
+             va='center_baseline', ha='center', rotation=90)
+
+# Eliminar las etiquetas del eje X
+plt.xticks([])
+
+# Configurar el borde del gráfico
+plt.gca().spines['top'].set_color('none')
+plt.gca().spines['right'].set_color('none')
+
+# Ajustar el diseño y guardar la imagen
+plt.tight_layout()
+plt.savefig('D:/BradfordLaw.png', format='png', dpi=300)  # Define un directorio donde se guardará la imagen generada
+plt.show()
